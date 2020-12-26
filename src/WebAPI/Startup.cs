@@ -88,6 +88,7 @@ namespace DesignPatternSamples.WebAPI
             app.UseAuthorization();
 
             app.UseDetranVerificadorDebitosFactory();
+            app.UseDetranVerificadorPontosFactory();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -108,6 +109,13 @@ namespace DesignPatternSamples.WebAPI
                 .AddTransient<DetranSPVerificadorDebitosRepository>()
                 .AddTransient<DetranRJVerificadorDebitosRepository>()
                 .AddTransient<DetranRSVerificadorDebitosRepository>()
+                .AddTransient<IDetranVerificadorPontosService, DetranVerificadorPontosServices>()
+                .Decorate<IDetranVerificadorPontosService, DetranVerificadorPontosDecoratorCache>()
+                .Decorate<IDetranVerificadorPontosService, DetranVerificadorPontosDecoratorLogger>()
+                .AddSingleton<IDetranVerificadorPontosFactory, DetranVerificadorPontosFactory>()
+                .AddTransient<DetranPEVerificadorPontosRepository>()
+                .AddTransient<DetranBAVerificadorPontosRepository>()
+                .AddTransient<DetranPBVerificadorPontosRepository>()
                 .AddScoped<ExceptionHandlingMiddleware>();
         }
 
@@ -130,6 +138,17 @@ namespace DesignPatternSamples.WebAPI
                 .Register("RJ", typeof(DetranRJVerificadorDebitosRepository))
                 .Register("SP", typeof(DetranSPVerificadorDebitosRepository))
                 .Register("RS", typeof(DetranRSVerificadorDebitosRepository));
+
+            return app;
+        }
+
+
+        public static IApplicationBuilder UseDetranVerificadorPontosFactory(this IApplicationBuilder app)
+        {
+            app.ApplicationServices.GetService<IDetranVerificadorPontosFactory>()
+                .Register("PE", typeof(DetranPEVerificadorPontosRepository))
+                .Register("PB", typeof(DetranPBVerificadorPontosRepository))
+                .Register("BA", typeof(DetranBAVerificadorPontosRepository));
 
             return app;
         }
